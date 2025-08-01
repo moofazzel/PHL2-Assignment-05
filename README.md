@@ -1,44 +1,166 @@
 # Digital Wallet API
 
-A secure, modular, and role-based backend API for a digital wallet system (similar to Bkash or Nagad) built with **Node.js**, **Express.js**, **Mongoose**, and **TypeScript**.
+A secure, modular, and role-based backend API for a digital wallet system built with Node.js, Express, TypeScript, and MongoDB.
 
-## 🎯 Project Overview
+## 🚀 Features
 
-This API implements a complete digital wallet system with three user roles:
-- **Users**: Can add money, withdraw, send money to others, and view transaction history
-- **Agents**: Can perform cash-in/cash-out operations for users and earn commissions
-- **Admins**: Can manage users, agents, wallets, and view system statistics
+### Authentication & Authorization
+- **JWT-based authentication** with secure token management
+- **Role-based access control** (User, Agent, Admin)
+- **Password hashing** using bcrypt
+- **Agent approval system** (agents require admin approval)
 
-## ✨ Features
+### Wallet Management
+- **Automatic wallet creation** during user/agent registration
+- **Initial balance**: ৳50 for all new users and agents
+- **Wallet blocking system** (admin-only)
+- **Balance validation** for all transactions
 
-### 🔐 Authentication & Authorization
-- JWT-based authentication with bcrypt password hashing
-- Role-based authorization (user, agent, admin)
-- Secure middleware for route protection
+### Transaction System
+- **Multiple transaction types**: deposit, withdraw, transfer, cash-in, cash-out
+- **Fee calculation**: 1% for transfers, 0.5% commission for agent operations
+- **Transaction history** with detailed tracking
+- **Status tracking**: pending, completed, failed, reversed
 
-### 💰 Wallet Management
-- Automatic wallet creation with ৳50 initial balance
-- Add money, withdraw, and transfer functionality
-- Wallet blocking/unblocking by admins
-- Balance validation and transaction safety
+### User Roles & Permissions
 
-### 🔄 Transaction System
-- Multiple transaction types: deposit, withdraw, transfer, cash-in, cash-out
-- Automatic fee calculation based on transaction type
-- Commission tracking for agents
-- Comprehensive transaction history
+#### 👤 **User**
+- Register and login
+- Add money to wallet
+- Withdraw money from wallet
+- Send money to other users
+- View transaction history
+- View wallet balance
 
-### 👥 User Management
-- User registration and login
-- Agent approval system
-- User status management (active/inactive)
-- Role-based access control
+#### 🏪 **Agent**
+- Register and login (requires admin approval)
+- Cash-in: Add money to user wallets
+- Cash-out: Withdraw money from user wallets
+- View commission history
+- View transaction history
 
-### 📊 Admin Dashboard
+#### 👑 **Admin**
 - View all users, agents, wallets, and transactions
-- System statistics and analytics
-- Agent approval/suspension
-- Wallet blocking/unblocking
+- Block/unblock user wallets
+- Approve/suspend agents
+- View system statistics
+- Manage user status
+
+## 📋 Wallet Management FAQ
+
+### How will wallets be created?
+**Wallets are created automatically during user/agent registration.** When a user or agent registers, the system automatically:
+1. Creates a new user/agent account
+2. Generates a wallet with initial balance of ৳50
+3. Links the wallet to the user/agent account
+
+### What happens during registration?
+1. **User/Agent Registration**:
+   - Validates email, password, name, phone
+   - Checks for existing users with same email/phone
+   - Creates user/agent account
+   - **Automatically creates wallet** with ৳50 initial balance
+   - Returns JWT token for authentication
+
+2. **Agent-Specific Process**:
+   - Agents are created with `isApproved: false`
+   - Must be approved by admin before they can login
+   - Still get wallet created during registration
+
+### Will users and agents get wallets?
+**Yes, both users and agents get wallets automatically created during registration.**
+
+### What initial balance will users/agents have?
+**All new users and agents start with ৳50 initial balance.**
+
+### Can users deactivate wallets?
+**No, users cannot deactivate their own wallets.** Only admins can block/unblock wallets through the admin interface.
+
+### What happens when a wallet is blocked?
+When a wallet is blocked:
+- ❌ **Cannot perform any transactions** (add money, withdraw, send money)
+- ❌ **Cannot receive money** from other users
+- ❌ **Cannot be used for cash-in/cash-out** by agents
+- ✅ **Can still view wallet balance and transaction history**
+- ✅ **Can still login to the system**
+
+### Can blocked wallets perform any operation?
+**No, blocked wallets cannot perform any financial operations:**
+- Cannot add money
+- Cannot withdraw money
+- Cannot send money
+- Cannot receive money
+- Cannot be used for agent cash-in/cash-out
+
+**However, blocked wallets can:**
+- View balance (read-only)
+- View transaction history (read-only)
+- Login to the system
+
+## 🛠️ Technology Stack
+
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Language**: TypeScript
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (JSON Web Tokens)
+- **Password Hashing**: bcrypt
+- **Validation**: Zod
+- **Security**: Helmet, CORS, Rate Limiting
+
+## 🏗️ Architecture
+
+### Project Structure
+```
+src/
+├── app.ts                 # Express application configuration
+├── server.ts              # Server startup and management
+├── config/
+│   └── database.ts        # MongoDB connection
+├── modules/
+│   ├── auth/
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.routes.ts
+│   │   ├── auth.validation.ts
+│   │   └── auth.interface.ts
+│   ├── user/
+│   │   ├── user.controller.ts
+│   │   ├── user.service.ts
+│   │   ├── user.routes.ts
+│   │   ├── user.validation.ts
+│   │   ├── user.model.ts
+│   │   └── user.interface.ts
+│   ├── wallet/
+│   │   ├── wallet.controller.ts
+│   │   ├── wallet.service.ts
+│   │   ├── wallet.routes.ts
+│   │   ├── wallet.validation.ts
+│   │   ├── wallet.model.ts
+│   │   └── wallet.interface.ts
+│   └── transaction/
+│       ├── transaction.controller.ts
+│       ├── transaction.service.ts
+│       ├── transaction.routes.ts
+│       ├── transaction.validation.ts
+│       ├── transaction.model.ts
+│       └── transaction.interface.ts
+├── middlewares/
+│   ├── auth.middleware.ts
+│   ├── validation.middleware.ts
+│   └── error.middleware.ts
+├── types/
+│   └── common.interface.ts
+└── utils/
+    └── jwt.ts
+```
+
+### Key Design Patterns
+- **Service Layer**: Business logic separated from controllers
+- **Validation Layer**: Zod schemas for request validation
+- **Interface-Driven**: Module-specific TypeScript interfaces
+- **Role-Based Access**: Middleware for authorization
+- **Error Handling**: Centralized error management
 
 ## 🚀 Quick Start
 
@@ -50,359 +172,194 @@ This API implements a complete digital wallet system with three user roles:
 ### Installation
 
 1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd digital-wallet-api
-   ```
+```bash
+git clone <repository-url>
+cd digital-wallet-api
+```
 
 2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
 3. **Environment Setup**
-   ```bash
-   cp env.example .env
-   ```
-   
-   Edit `.env` file with your configuration:
-   ```env
-   NODE_ENV=development
-   PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/digital-wallet
-   JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-   JWT_EXPIRES_IN=7d
-   BCRYPT_ROUNDS=12
-   ```
-
-4. **Start MongoDB**
-   ```bash
-   # If using local MongoDB
-   mongod
-   ```
-
-5. **Run the application**
-   ```bash
-   # Development mode
-   npm run dev
-   
-   # Production mode
-   npm run build
-   npm start
-   ```
-
-6. **Verify installation**
-   ```bash
-   curl http://localhost:5000/health
-   ```
-
-## 📚 API Documentation
-
-### Base URL
+```bash
+cp env.example .env
 ```
-http://localhost:5000/api
+Edit `.env` file:
+```env
+NODE_ENV=development
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/digital-wallet
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRES_IN=7d
+BCRYPT_ROUNDS=12
 ```
 
-### Authentication Endpoints
-
-#### Register User
-```http
-POST /auth/register
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "phone": "01712345678",
-  "role": "user" // or "agent"
-}
+4. **Create Admin User**
+```bash
+npm run create-admin
 ```
 
-#### Login
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
+5. **Start Development Server**
+```bash
+npm run dev
 ```
 
-### Wallet Endpoints
+The server will start on `http://localhost:5000`
 
-#### Get My Wallet (User)
-```http
-GET /wallets/me
-Authorization: Bearer <token>
-```
+## 📚 API Endpoints
 
-#### Add Money (User)
-```http
-POST /wallets/add-money
-Authorization: Bearer <token>
-Content-Type: application/json
+### Authentication
+- `POST /api/auth/register` - Register new user/agent
+- `POST /api/auth/login` - Login user/agent
 
-{
-  "amount": 1000
-}
-```
+### User Wallet Operations
+- `GET /api/wallets/me` - Get user's wallet
+- `POST /api/wallets/add-money` - Add money to wallet
+- `POST /api/wallets/withdraw` - Withdraw money from wallet
+- `POST /api/wallets/send-money` - Send money to another user
 
-#### Withdraw Money (User)
-```http
-POST /wallets/withdraw
-Authorization: Bearer <token>
-Content-Type: application/json
+### Agent Operations
+- `POST /api/wallets/cash-in` - Add money to user wallet
+- `POST /api/wallets/cash-out` - Withdraw money from user wallet
 
-{
-  "amount": 500
-}
-```
+### Transactions
+- `GET /api/transactions/my` - Get user's transaction history
+- `GET /api/transactions/commissions` - Get agent's commission history
 
-#### Send Money (User)
-```http
-POST /wallets/send-money
-Authorization: Bearer <token>
-Content-Type: application/json
+### Admin Operations
+- `GET /api/users/all` - Get all users
+- `GET /api/users/agents` - Get all agents
+- `PATCH /api/users/toggle-user-status` - Block/unblock user
+- `PATCH /api/users/toggle-agent-approval` - Approve/suspend agent
+- `GET /api/users/stats` - Get user statistics
+- `GET /api/wallets/all` - Get all wallets
+- `PATCH /api/wallets/toggle-block` - Block/unblock wallet
+- `GET /api/transactions/all` - Get all transactions
+- `GET /api/transactions/stats` - Get transaction statistics
 
-{
-  "amount": 200,
-  "toUserId": "user_id_here"
-}
-```
+## 🔐 Security Features
 
-#### Cash In (Agent)
-```http
-POST /wallets/cash-in
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "amount": 1000,
-  "userId": "user_id_here"
-}
-```
-
-#### Cash Out (Agent)
-```http
-POST /wallets/cash-out
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "amount": 500,
-  "userId": "user_id_here"
-}
-```
-
-### Transaction Endpoints
-
-#### Get My Transactions (User)
-```http
-GET /transactions/my?page=1&limit=10
-Authorization: Bearer <token>
-```
-
-#### Get Commission History (Agent)
-```http
-GET /transactions/commissions?page=1&limit=10
-Authorization: Bearer <token>
-```
-
-### Admin Endpoints
-
-#### Get All Users
-```http
-GET /users/all?page=1&limit=20&role=user
-Authorization: Bearer <token>
-```
-
-#### Get All Agents
-```http
-GET /users/agents?page=1&limit=20
-Authorization: Bearer <token>
-```
-
-#### Approve/Suspend Agent
-```http
-PATCH /users/toggle-agent-approval
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "agentId": "agent_id_here"
-}
-```
-
-#### Toggle User Status
-```http
-PATCH /users/toggle-user-status
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "userId": "user_id_here"
-}
-```
-
-#### Get All Wallets
-```http
-GET /wallets/all?page=1&limit=20
-Authorization: Bearer <token>
-```
-
-#### Block/Unblock Wallet
-```http
-PATCH /wallets/toggle-block
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "walletId": "wallet_id_here"
-}
-```
-
-#### Get All Transactions
-```http
-GET /transactions/all?page=1&limit=20
-Authorization: Bearer <token>
-```
-
-#### Get Transaction Statistics
-```http
-GET /transactions/stats
-Authorization: Bearer <token>
-```
-
-#### Get User Statistics
-```http
-GET /users/stats
-Authorization: Bearer <token>
-```
-
-## 🏗️ Project Structure
-
-```
-src/
-├── config/
-│   └── database.ts          # Database connection
-├── middlewares/
-│   ├── auth.middleware.ts   # Authentication & authorization
-│   └── error.middleware.ts  # Error handling
-├── modules/
-│   ├── auth/
-│   │   ├── auth.controller.ts
-│   │   └── auth.routes.ts
-│   ├── user/
-│   │   ├── user.controller.ts
-│   │   ├── user.model.ts
-│   │   └── user.routes.ts
-│   ├── wallet/
-│   │   ├── wallet.controller.ts
-│   │   ├── wallet.model.ts
-│   │   └── wallet.routes.ts
-│   └── transaction/
-│       ├── transaction.controller.ts
-│       ├── transaction.model.ts
-│       └── transaction.routes.ts
-├── types/
-│   └── index.ts             # TypeScript interfaces
-├── utils/
-│   └── jwt.ts              # JWT utilities
-└── app.ts                   # Main application file
-```
-
-## 🔧 Business Logic
-
-### Transaction Types & Fees
-- **Deposit**: No fee
-- **Withdraw**: 0.5% or max ৳5
-- **Transfer**: 1% or max ৳10
-- **Cash-in/Cash-out**: 1% or max ৳15 fee + 0.5% or max ৳10 commission
-
-### Role Permissions
-- **Users**: Can manage their own wallet and transactions
-- **Agents**: Can perform cash-in/cash-out for users, earn commissions
-- **Admins**: Full system access and management capabilities
-
-### Security Features
+### Authentication
+- JWT-based authentication
 - Password hashing with bcrypt
-- JWT token authentication
-- Role-based route protection
-- Input validation and sanitization
+- Token expiration handling
+- Secure token storage
+
+### Authorization
+- Role-based access control
+- Route protection middleware
+- Agent approval system
+- Admin-only operations
+
+### Data Protection
+- Input validation with Zod
+- SQL injection prevention (MongoDB)
+- XSS protection with Helmet
 - Rate limiting
-- CORS protection
-- Helmet security headers
+- CORS configuration
 
-## 🧪 Testing with Postman
+## 💰 Business Logic
 
-1. **Import the collection** (create a Postman collection with the endpoints above)
-2. **Set up environment variables**:
-   - `baseUrl`: `http://localhost:5000/api`
-   - `token`: (will be set after login)
+### Transaction Fees
+- **Transfer**: 1% of amount
+- **Cash-in/Cash-out**: 0.5% commission for agents
+- **Deposit/Withdraw**: No fees
 
-3. **Test Flow**:
-   - Register a user
-   - Login and save the token
-   - Test wallet operations
-   - Test transactions
-   - Test admin functions (with admin account)
+### Balance Validation
+- Cannot perform transactions with insufficient balance
+- Cannot send money to yourself
+- Cannot perform operations on blocked wallets
+- Fee calculation included in balance checks
+
+### Agent Commission
+- Agents earn 0.5% commission on cash-in/cash-out operations
+- Commission is tracked in transaction history
+- Agents can view their commission earnings
+
+## 🧪 Testing
+
+### Postman Collection
+Import the provided Postman collection for testing all endpoints.
+
+### Manual Testing
+1. Register a user: `POST /api/auth/register`
+2. Login: `POST /api/auth/login`
+3. Use the returned token in Authorization header: `Bearer <token>`
+4. Test wallet operations and transactions
 
 ## 📊 Database Schema
 
-### User Schema
+### User Model
 ```typescript
 {
   email: string (unique),
   password: string (hashed),
   name: string,
   phone: string (unique),
-  role: 'user' | 'agent' | 'admin',
+  role: "user" | "agent" | "admin",
   isActive: boolean,
-  isApproved: boolean (for agents)
+  isApproved: boolean (for agents),
+  createdAt: Date,
+  updatedAt: Date
 }
 ```
 
-### Wallet Schema
+### Wallet Model
 ```typescript
 {
   userId: ObjectId (ref: User),
-  balance: number (default: 50),
-  isBlocked: boolean (default: false)
+  balance: number (min: 0),
+  isBlocked: boolean,
+  createdAt: Date,
+  updatedAt: Date
 }
 ```
 
-### Transaction Schema
+### Transaction Model
 ```typescript
 {
-  type: 'deposit' | 'withdraw' | 'transfer' | 'cash-in' | 'cash-out',
+  type: "deposit" | "withdraw" | "transfer" | "cash-in" | "cash-out",
   amount: number,
   fee: number,
-  commission: number (optional),
-  fromWalletId: ObjectId,
-  toWalletId: ObjectId (optional),
-  fromUserId: ObjectId,
-  toUserId: ObjectId (optional),
-  initiatedBy: ObjectId,
-  status: 'pending' | 'completed' | 'failed' | 'reversed',
-  description: string (optional)
+  commission: number,
+  fromWalletId: ObjectId (ref: Wallet),
+  toWalletId: ObjectId (ref: Wallet),
+  fromUserId: ObjectId (ref: User),
+  toUserId: ObjectId (ref: User),
+  initiatedBy: ObjectId (ref: User),
+  status: "pending" | "completed" | "failed" | "reversed",
+  description: string,
+  createdAt: Date,
+  updatedAt: Date
 }
 ```
 
 ## 🚀 Deployment
 
-### Environment Variables
-Make sure to set proper environment variables for production:
-- `NODE_ENV=production`
-- `MONGODB_URI`: Your MongoDB connection string
-- `JWT_SECRET`: A strong, unique secret key
-- `PORT`: Your desired port
-
-### Build for Production
+### Production Build
 ```bash
 npm run build
 npm start
+```
+
+### Environment Variables
+- `NODE_ENV`: production
+- `PORT`: Server port
+- `MONGODB_URI`: MongoDB connection string
+- `JWT_SECRET`: Secret key for JWT signing
+- `JWT_EXPIRES_IN`: Token expiration time
+
+### Docker (Optional)
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY dist ./dist
+EXPOSE 5000
+CMD ["npm", "start"]
 ```
 
 ## 🤝 Contributing
@@ -413,14 +370,18 @@ npm start
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📝 License
+## 📄 License
 
 This project is licensed under the MIT License.
 
 ## 🆘 Support
 
-For support or questions, please open an issue in the repository.
+For support and questions:
+- Check the API documentation
+- Review the Postman collection
+- Test with the provided endpoints
+- Check server logs for errors
 
 ---
 
-**Built with ❤️ using Node.js, Express, Mongoose, and TypeScript** 
+**Digital Wallet API** - A secure and scalable wallet management system 🚀 

@@ -1,10 +1,6 @@
 import bcrypt from "bcryptjs";
-import mongoose, { Document, Schema } from "mongoose";
-import { IUser } from "../../types";
-
-export interface IUserDocument extends IUser, Document {
-  comparePassword(candidatePassword: string): Promise<boolean>;
-}
+import mongoose, { Schema } from "mongoose";
+import { IUserDocument } from "./user.interface";
 
 const userSchema = new Schema<IUserDocument>(
   {
@@ -54,9 +50,7 @@ const userSchema = new Schema<IUserDocument>(
       default: false, // Only for agents
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 // Hash password before saving
@@ -64,8 +58,8 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
-    const saltRounds = parseInt(process.env.BCRYPT_ROUNDS || "12");
-    this.password = await bcrypt.hash(this.password, saltRounds);
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error as Error);

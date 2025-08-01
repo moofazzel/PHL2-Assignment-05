@@ -1,6 +1,7 @@
 import { NextFunction, Response } from "express";
+import { JWTPayload } from "../modules/auth/auth.interface";
 import { User } from "../modules/user/user.model";
-import { AuthRequest } from "../types";
+import { AuthRequest } from "../types/common.interface";
 import { extractTokenFromHeader, verifyToken } from "../utils/jwt";
 
 export const authenticate = async (
@@ -10,43 +11,56 @@ export const authenticate = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-
     if (!authHeader) {
       res.status(401).json({
         success: false,
-        message: "Access denied. No token provided.",
+        message: "Authorization header is required",
       });
       return;
     }
 
     const token = extractTokenFromHeader(authHeader);
-    const decoded = verifyToken(token);
+    const decoded = verifyToken(token) as JWTPayload;
 
-    // Check if user still exists and is active
     const user = await User.findById(decoded.userId).select("-password");
-    if (!user || !user.isActive) {
+    if (!user) {
       res.status(401).json({
         success: false,
-        message: "User not found or inactive",
+        message: "User not found",
       });
       return;
     }
 
-    // For agents, check if they are approved
+    if (!user.isActive) {
+      res.status(401).json({
+        success: false,
+        message: "Account is deactivated",
+      });
+      return;
+    }
+
+    // For agents, check if approved
     if (user.role === "agent" && !user.isApproved) {
       res.status(403).json({
         success: false,
-        message: "Agent account is not approved",
+        message: "Agent account is not approved yet",
       });
       return;
     }
 
-    req.user = decoded;
+    req.user = {
+      _id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      isActive: user.isActive,
+      isApproved: user.isApproved,
+    };
+
     next();
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: "Invalid token",
+      message: "Invalid or expired token",
     });
   }
 };
@@ -56,7 +70,7 @@ export const authorize = (...roles: string[]) => {
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "Access denied. No token provided.",
+        message: "Authentication required",
       });
       return;
     }
@@ -64,7 +78,7 @@ export const authorize = (...roles: string[]) => {
     if (!roles.includes(req.user.role)) {
       res.status(403).json({
         success: false,
-        message: `Access denied. ${req.user.role} role is not authorized.`,
+        message: "Access denied. Insufficient permissions.",
       });
       return;
     }
@@ -73,7 +87,6 @@ export const authorize = (...roles: string[]) => {
   };
 };
 
-// Specific role middlewares
 export const requireUser = authorize("user");
 export const requireAgent = authorize("agent");
 export const requireAdmin = authorize("admin");

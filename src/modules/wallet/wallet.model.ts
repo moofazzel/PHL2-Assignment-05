@@ -1,12 +1,5 @@
-import mongoose, { Document, Schema } from "mongoose";
-import { IWallet } from "../../types";
-
-export interface IWalletDocument extends IWallet, Document {
-  canPerformTransaction(amount: number): boolean;
-  addMoney(amount: number): Promise<void>;
-  withdrawMoney(amount: number): Promise<void>;
-  transferMoney(amount: number): Promise<void>;
-}
+import mongoose, { Schema } from "mongoose";
+import { IWalletDocument } from "./wallet.interface";
 
 const walletSchema = new Schema<IWalletDocument>(
   {
@@ -19,7 +12,7 @@ const walletSchema = new Schema<IWalletDocument>(
     balance: {
       type: Number,
       required: true,
-      default: 50, // Initial balance of ৳50
+      default: 50,
       min: [0, "Balance cannot be negative"],
     },
     isBlocked: {
@@ -27,26 +20,18 @@ const walletSchema = new Schema<IWalletDocument>(
       default: false,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 // Check if wallet can perform transaction
 walletSchema.methods.canPerformTransaction = function (
   amount: number
 ): boolean {
-  if (this.isBlocked) {
-    return false;
-  }
-  return this.balance >= amount;
+  return this.balance >= amount && !this.isBlocked;
 };
 
 // Add money to wallet
 walletSchema.methods.addMoney = async function (amount: number): Promise<void> {
-  if (amount <= 0) {
-    throw new Error("Amount must be positive");
-  }
   this.balance += amount;
   await this.save();
 };
@@ -55,9 +40,6 @@ walletSchema.methods.addMoney = async function (amount: number): Promise<void> {
 walletSchema.methods.withdrawMoney = async function (
   amount: number
 ): Promise<void> {
-  if (amount <= 0) {
-    throw new Error("Amount must be positive");
-  }
   if (!this.canPerformTransaction(amount)) {
     throw new Error("Insufficient balance or wallet is blocked");
   }
@@ -65,14 +47,18 @@ walletSchema.methods.withdrawMoney = async function (
   await this.save();
 };
 
-// Transfer money from wallet (for transfer transactions)
+// Transfer money from wallet (for fees, etc.)
 walletSchema.methods.transferMoney = async function (
   amount: number
 ): Promise<void> {
-  await this.withdrawMoney(amount);
+  if (!this.canPerformTransaction(amount)) {
+    throw new Error("Insufficient balance or wallet is blocked");
+  }
+  this.balance -= amount;
+  await this.save();
 };
 
-// Index for better query performance
+// Indexes
 walletSchema.index({ userId: 1 });
 walletSchema.index({ isBlocked: 1 });
 
