@@ -4,10 +4,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { errorHandler, notFound } from "./middlewares/error.middleware";
-import authRoutes from "./modules/auth/auth.routes";
-import transactionRoutes from "./modules/transaction/transaction.routes";
-import userRoutes from "./modules/user/user.routes";
-import walletRoutes from "./modules/wallet/wallet.routes";
+import apiRoutes from "./routes/router";
 
 dotenv.config();
 
@@ -34,6 +31,23 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// Root endpoint
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Digital Wallet API",
+    version: "1.0.0",
+    endpoints: {
+      auth: "/api/auth",
+      wallets: "/api/wallets",
+      transactions: "/api/transactions",
+      users: "/api/users",
+      health: "/health",
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -44,10 +58,7 @@ app.get("/health", (req, res) => {
 });
 
 // API routes
-app.use("/api/auth", authRoutes);
-app.use("/api/wallets", walletRoutes);
-app.use("/api/transactions", transactionRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api", apiRoutes);
 
 // 404 handler
 app.use(notFound);
