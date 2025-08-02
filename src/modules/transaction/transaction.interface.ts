@@ -1,7 +1,6 @@
-import { Types } from "mongoose";
+import { Document, Types } from "mongoose";
 
 export interface ITransaction {
-  _id: string;
   type: "deposit" | "withdraw" | "transfer" | "cash-in" | "cash-out";
   amount: number;
   fee: number;
