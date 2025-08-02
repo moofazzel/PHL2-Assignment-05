@@ -6,30 +6,35 @@ import {
   requireUser,
 } from "../../middlewares/auth.middleware";
 import {
-  addMoney,
-  cashIn,
-  cashOut,
-  getAllWallets,
-  getWallet,
-  sendMoney,
-  toggleWalletBlock,
-  withdrawMoney,
+  addMoneyController,
+  cashInController,
+  cashOutController,
+  getAllWalletsController,
+  getWalletController,
+  sendMoneyController,
+  toggleWalletBlockController,
+  withdrawMoneyController,
 } from "./wallet.controller";
 
 const router = Router();
 
 // User routes
-router.get("/me", authenticate, requireUser, getWallet);
-router.post("/add-money", authenticate, requireUser, addMoney);
-router.post("/withdraw", authenticate, requireUser, withdrawMoney);
-router.post("/send-money", authenticate, requireUser, sendMoney);
+router.get("/me", authenticate, requireUser, getWalletController);
+router.post("/add-money", authenticate, requireUser, addMoneyController);
+router.post("/withdraw", authenticate, requireUser, withdrawMoneyController);
+router.post("/send-money", authenticate, requireUser, sendMoneyController);
 
 // Agent routes
-router.post("/cash-in", authenticate, requireAgent, cashIn);
-router.post("/cash-out", authenticate, requireAgent, cashOut);
+router.post("/cash-in", authenticate, requireAgent, cashInController);
+router.post("/cash-out", authenticate, requireAgent, cashOutController);
 
 // Admin routes
-router.get("/all", authenticate, requireAdmin, getAllWallets);
-router.patch("/toggle-block", authenticate, requireAdmin, toggleWalletBlock);
+router.get("/all", authenticate, requireAdmin, getAllWalletsController);
+router.patch(
+  "/toggle-block",
+  authenticate,
+  requireAdmin,
+  toggleWalletBlockController
+);
 
 export default router;

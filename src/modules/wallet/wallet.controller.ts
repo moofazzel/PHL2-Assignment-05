@@ -1,7 +1,16 @@
 import { Request, Response } from "express";
 import { validateRequest } from "../../middlewares/validation.middleware";
 import { AuthRequest } from "../../types/common.interface";
-import { WalletService } from "./wallet.service";
+import {
+  addMoney,
+  cashIn,
+  cashOut,
+  getAllWallets,
+  getWallet,
+  sendMoney,
+  toggleWalletBlock,
+  withdrawMoney,
+} from "./wallet.service";
 import {
   addMoneySchema,
   cashInSchema,
@@ -12,12 +21,12 @@ import {
   withdrawMoneySchema,
 } from "./wallet.validation";
 
-export const getWallet = async (
+export const getWalletController = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const result = await WalletService.getWallet(req.user!._id);
+    const result = await getWallet(req.user!._id);
     res.status(200).json(result);
   } catch (error) {
     res.status(404).json({
@@ -27,14 +36,11 @@ export const getWallet = async (
   }
 };
 
-export const addMoney = [
+export const addMoneyController = [
   validateRequest(addMoneySchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const result = await WalletService.addMoney(
-        req.user!._id,
-        req.body.amount
-      );
+      const result = await addMoney(req.user!._id, req.body.amount);
       res.status(200).json(result);
     } catch (error) {
       res.status(400).json({
@@ -45,14 +51,11 @@ export const addMoney = [
   },
 ];
 
-export const withdrawMoney = [
+export const withdrawMoneyController = [
   validateRequest(withdrawMoneySchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const result = await WalletService.withdrawMoney(
-        req.user!._id,
-        req.body.amount
-      );
+      const result = await withdrawMoney(req.user!._id, req.body.amount);
       res.status(200).json(result);
     } catch (error) {
       res.status(400).json({
@@ -64,11 +67,11 @@ export const withdrawMoney = [
   },
 ];
 
-export const sendMoney = [
+export const sendMoneyController = [
   validateRequest(sendMoneySchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const result = await WalletService.sendMoney(
+      const result = await sendMoney(
         req.user!._id,
         req.body.toUserId,
         req.body.amount
@@ -84,11 +87,11 @@ export const sendMoney = [
   },
 ];
 
-export const cashIn = [
+export const cashInController = [
   validateRequest(cashInSchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const result = await WalletService.cashIn(
+      const result = await cashIn(
         req.user!._id,
         req.body.userId,
         req.body.amount
@@ -103,11 +106,11 @@ export const cashIn = [
   },
 ];
 
-export const cashOut = [
+export const cashOutController = [
   validateRequest(cashOutSchema),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const result = await WalletService.cashOut(
+      const result = await cashOut(
         req.user!._id,
         req.body.userId,
         req.body.amount
@@ -122,11 +125,11 @@ export const cashOut = [
   },
 ];
 
-export const getAllWallets = [
+export const getAllWalletsController = [
   validateRequest(walletQuerySchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await WalletService.getAllWallets(req.query);
+      const result = await getAllWallets(req.query);
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({
@@ -138,11 +141,11 @@ export const getAllWallets = [
   },
 ];
 
-export const toggleWalletBlock = [
+export const toggleWalletBlockController = [
   validateRequest(toggleWalletBlockSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await WalletService.toggleWalletBlock(req.body.walletId);
+      const result = await toggleWalletBlock(req.body.walletId);
       res.status(200).json(result);
     } catch (error) {
       res.status(400).json({

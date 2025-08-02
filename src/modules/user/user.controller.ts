@@ -1,17 +1,23 @@
 import { Request, Response } from "express";
 import { validateRequest } from "../../middlewares/validation.middleware";
-import { UserService } from "./user.service";
+import {
+  getAllAgents,
+  getAllUsers,
+  getUserStats,
+  toggleAgentApproval,
+  toggleUserStatus,
+} from "./user.service";
 import {
   toggleAgentApprovalSchema,
   toggleUserStatusSchema,
   userQuerySchema,
 } from "./user.validation";
 
-export const getAllUsers = [
+export const getAllUsersController = [
   validateRequest(userQuerySchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await UserService.getAllUsers(req.query);
+      const result = await getAllUsers(req.query);
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({
@@ -22,11 +28,11 @@ export const getAllUsers = [
   },
 ];
 
-export const getAllAgents = [
+export const getAllAgentsController = [
   validateRequest(userQuerySchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await UserService.getAllAgents(req.query);
+      const result = await getAllAgents(req.query);
       res.status(200).json(result);
     } catch (error) {
       res.status(500).json({
@@ -38,11 +44,11 @@ export const getAllAgents = [
   },
 ];
 
-export const toggleUserStatus = [
+export const toggleUserStatusController = [
   validateRequest(toggleUserStatusSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await UserService.toggleUserStatus(req.body.userId);
+      const result = await toggleUserStatus(req.body.userId);
       res.status(200).json(result);
     } catch (error) {
       res.status(400).json({
@@ -56,11 +62,11 @@ export const toggleUserStatus = [
   },
 ];
 
-export const toggleAgentApproval = [
+export const toggleAgentApprovalController = [
   validateRequest(toggleAgentApprovalSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await UserService.toggleAgentApproval(req.body.agentId);
+      const result = await toggleAgentApproval(req.body.agentId);
       res.status(200).json(result);
     } catch (error) {
       res.status(400).json({
@@ -74,12 +80,12 @@ export const toggleAgentApproval = [
   },
 ];
 
-export const getUserStats = async (
+export const getUserStatsController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const result = await UserService.getUserStats();
+    const result = await getUserStats();
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({

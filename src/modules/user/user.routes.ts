@@ -1,30 +1,30 @@
 import { Router } from "express";
 import { authenticate, requireAdmin } from "../../middlewares/auth.middleware";
 import {
-  getAllAgents,
-  getAllUsers,
-  getUserStats,
-  toggleAgentApproval,
-  toggleUserStatus,
+  getAllAgentsController,
+  getAllUsersController,
+  getUserStatsController,
+  toggleAgentApprovalController,
+  toggleUserStatusController,
 } from "./user.controller";
 
 const router = Router();
 
 // Admin routes
-router.get("/all", authenticate, requireAdmin, getAllUsers);
-router.get("/agents", authenticate, requireAdmin, getAllAgents);
+router.get("/all", authenticate, requireAdmin, getAllUsersController);
+router.get("/agents", authenticate, requireAdmin, getAllAgentsController);
 router.patch(
   "/toggle-agent-approval",
   authenticate,
   requireAdmin,
-  toggleAgentApproval
+  toggleAgentApprovalController
 );
 router.patch(
   "/toggle-user-status",
   authenticate,
   requireAdmin,
-  toggleUserStatus
+  toggleUserStatusController
 );
-router.get("/stats", authenticate, requireAdmin, getUserStats);
+router.get("/stats", authenticate, requireAdmin, getUserStatsController);
 
 export default router;

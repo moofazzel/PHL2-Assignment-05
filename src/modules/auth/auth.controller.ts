@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { validateRequest } from "../../middlewares/validation.middleware";
-import { AuthService } from "./auth.service";
+import { loginUser, registerUser } from "./auth.service";
 import { loginSchema, registerSchema } from "./auth.validation";
 
 export const register = [
   validateRequest(registerSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await AuthService.register(req.body);
+      const result = await registerUser(req.body);
       res.status(201).json(result);
     } catch (error) {
       res.status(400).json({
@@ -22,7 +22,7 @@ export const login = [
   validateRequest(loginSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await AuthService.login(req.body);
+      const result = await loginUser(req.body);
       res.status(200).json(result);
     } catch (error) {
       res.status(401).json({
